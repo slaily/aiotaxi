@@ -9,6 +9,7 @@ async def handle_client(reader, writer):
     try:
         addr = writer.get_extra_info('peername')
         common.display_connected_client(addr)
+        unrecognized_message_counter = 0
 
         while message := await reader.readline():
             decoded_message = message.decode()
@@ -16,13 +17,23 @@ async def handle_client(reader, writer):
 
             if decoded_message.lower().startswith('close'):
                 break
+            else:
+                if unrecognized_message_counter == 3:
+                    break
+
+                unrecognized_message_counter += 1
+                asyncio.create_task(
+                    common.write_message(
+                        writer, b'Unrecognized message, do you need a taxi?\n'
+                    )
+                )
 
         print(f'Client {addr!r} - Leaving Connection.')
     except asyncio.CancelledError:
         for task in asyncio.all_tasks():
             task.cancel()
 
-        print('Connection dropped!')
+        print(f'Client {addr!r} connection dropped.')
     finally:
         writer.close()
 
