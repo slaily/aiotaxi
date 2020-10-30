@@ -7,7 +7,6 @@ async def read_message(reader):
 async def write_message(writer, message):
     writer.write(message)
     await writer.drain()
-    writer.close()
 
     return writer
 
@@ -18,3 +17,8 @@ def display_connected_client(addr):
 
 def display_received_message(message, addr):
     print(f"Received {message!r} from {addr!r}")
+
+
+async def close_stream_writer(writer):
+    writer.close()
+    await writer.wait_closed()
