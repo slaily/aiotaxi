@@ -19,12 +19,21 @@ async def handle_client(reader, writer):
                 dispatcher_reader, dispatcher_writer = await utils.establish_ext_serv_conn(
                     '127.0.0.1', 9999
                 )
+
+                if not dispatcher_writer:
+                    continue
+
                 asyncio.create_task(
                     common.write_message(dispatcher_writer, message)
                 )
+
+                if not dispatcher_reader:
+                    continue
+
                 ext_message = await common.read_message(dispatcher_reader)
                 dispatcher_addr = dispatcher_writer.get_extra_info('peername')
                 common.display_received_message(ext_message, dispatcher_addr)
+                asyncio.create_task(common.close_stream_writer(dispatcher_writer))
             elif decoded_message.lower().startswith('close'):
                 break
             else:
