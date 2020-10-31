@@ -33,7 +33,13 @@ async def handle_client(reader, writer):
                 ext_message = await common.read_message(dispatcher_reader)
                 dispatcher_addr = dispatcher_writer.get_extra_info('peername')
                 common.display_received_message(ext_message, dispatcher_addr)
-                asyncio.create_task(common.close_stream_writer(dispatcher_writer))
+                asyncio.create_task(
+                    common.close_stream_writer(dispatcher_writer)
+                )
+                asyncio.create_task(
+                    common.write_message(writer, ext_message.encode('utf-8'))
+                )
+                break
             elif decoded_message.lower().startswith('close'):
                 break
             else:
@@ -54,7 +60,9 @@ async def handle_client(reader, writer):
 
         print(f'Client {addr!r} connection dropped.')
     finally:
-        writer.close()
+        asyncio.create_task(
+            common.close_stream_writer(writer)
+        )
 
 
 async def main():
