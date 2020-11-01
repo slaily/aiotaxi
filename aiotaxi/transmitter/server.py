@@ -1,5 +1,7 @@
 import asyncio
 
+from json import dumps
+
 from aiotaxi import common
 
 from . import utils
@@ -7,12 +9,12 @@ from . import utils
 
 async def handle_client(reader, writer):
     try:
-        addr = writer.get_extra_info('peername')
+        addr = common.get_client_addr(writer)
         common.display_connected_client(addr)
         unrecognized_message_counter = 0
 
         while message := await reader.readline():
-            decoded_message = message.decode()
+            decoded_message = message.decode().strip('\n')
             common.display_received_message(decoded_message, addr)
 
             if decoded_message.lower().startswith('dispatcher'):
@@ -23,8 +25,13 @@ async def handle_client(reader, writer):
                 if not dispatcher_writer:
                     continue
 
+                msg_to_send_dict = {
+                    'from_addr': addr,
+                    'message': decoded_message
+                }
+                msg_to_send = dumps(msg_to_send_dict).encode('utf-8')
                 asyncio.create_task(
-                    common.write_message(dispatcher_writer, message)
+                    common.write_message(dispatcher_writer, msg_to_send)
                 )
 
                 if not dispatcher_reader:
