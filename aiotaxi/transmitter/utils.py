@@ -36,17 +36,13 @@ async def transmit_message_to_dispatcher(from_addr, message):
         settings.DISPATCHER_HOST, settings.DISPATCHER_PORT
     )
 
-    if not writer:
+    if not writer or not reader:
         return False, b"Sorry, your request cannot be processed at this time!\n"
 
-    message_to_send =format_message_to_send(from_addr, message)
+    message_to_send = format_message_to_send(from_addr, message)
     asyncio.create_task(
         common.write_message(writer, message_to_send)
     )
-
-    if not reader:
-        return False, b"Sorry, your request cannot be processed at this time!\n"
-
     received_message = await common.read_message(reader)
     dispatcher_addr = common.get_client_addr(writer)
     common.display_received_message(received_message, dispatcher_addr)
