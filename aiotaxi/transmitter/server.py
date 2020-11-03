@@ -23,6 +23,17 @@ async def handle_client(reader, writer):
                     common.write_message(writer, received_message)
                 )
                 break
+            elif decoded_message.lower().startswith('client'):
+                is_transmitted, received_message = await utils.transmit_message_to_dispatcher(
+                    addr, decoded_message
+                )
+
+                if not is_transmitted:
+                    break
+
+                asyncio.create_task(
+                    common.write_message(writer, received_message)
+                )
             elif decoded_message.lower().startswith('close'):
                 break
             else:
