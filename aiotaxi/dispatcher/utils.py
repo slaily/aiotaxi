@@ -18,3 +18,17 @@ def get_dispatcher(dispatcher_id):
 
 def set_dispatcher_as_available(dispatcher_id):
     structs.available_dispatchers.append(dispatcher_id)
+
+
+def has_available_dispatcher():
+    return len(structs.available_dispatchers) > 0
+
+
+def get_dispatcher():
+    return structs.available_dispatchers.popleft()
+
+
+def assing_client_to_dispatcher(client, dispatcher):
+    structs.clients[client] = dispatcher
+
+    return client
