@@ -13,3 +13,4 @@ class Dispatcher(TypedDict):
 
 dispatchers: Dict[TypedDict, Dispatcher] = {}
 available_dispatchers: Deque = deque()
+clients: Dict[str, str] = {}
