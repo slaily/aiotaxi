@@ -18,3 +18,9 @@ class CommonTestCase(TestCase):
         reader = asyncio.run(common.read_message(amock))
 
         amock.read.assert_called_with(100)
+
+    def test_close_stream_writer(self):
+        amock = AsyncMock(spec=asyncio.StreamWriter)
+        writer = asyncio.run(common.close_stream_writer(amock))
+
+        amock.wait_closed.assert_awaited_once()
