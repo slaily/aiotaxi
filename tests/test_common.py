@@ -1,22 +1,20 @@
 import asyncio
 
 from unittest import TestCase
-from unittest.mock import patch
+from unittest.mock import AsyncMock
 
 from aiotaxi import common
 
 
 class CommonTestCase(TestCase):
-    @patch('aiotaxi.common.write_message')
-    def test_write_message(self, mock_writer):
-        mock_writer.return_value = asyncio.StreamWriter
-        writer = asyncio.run(common.write_message())
+    def test_write_message(self):
+        amock = AsyncMock(spec=asyncio.StreamWriter)
+        writer = asyncio.run(common.write_message(amock, b'tcase'))
 
-        self.assertIs(writer, asyncio.StreamWriter)
+        amock.drain.assert_awaited_once()
 
-    @patch('aiotaxi.common.read_message')
-    def test_read_message(self, mock_reader):
-        mock_reader.return_value = asyncio.StreamReader
-        reader = asyncio.run(common.read_message())
+    def test_read_message(self):
+        amock = AsyncMock(spec=asyncio.StreamReader)
+        reader = asyncio.run(common.read_message(amock))
 
-        self.assertIs(reader, asyncio.StreamReader)
+        amock.read.assert_called_with(100)
