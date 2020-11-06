@@ -16,8 +16,14 @@ async def handle_client(reader, writer):
 
     if received_message_dict['message'].lower().startswith('dispatcher'):
         dispatcher_id = utils.assign_dispatcher('Available')
+        utils.set_dispatcher_as_available(dispatcher_id)
         message_to_send = dispatcher_id.encode('utf-8')
         await common.write_message(writer, message_to_send)
+    elif received_message_dict['message'].startswith('client'):
+        if utils.has_available_dispatcher():
+            dispatcher = utils.get_dispatcher()
+            utils.assing_client_to_dispatcher(addr, dispatcher)
+            await common.write_message(writer, b'Dispatcher: What is the address?')
 
     await common.close_stream_writer(writer)
     print(f'Client {addr} - connection closed.')
