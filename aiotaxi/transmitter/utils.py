@@ -6,6 +6,24 @@ from aiotaxi import common
 from aiotaxi import settings
 
 
+# ***-------------***
+# *** Synchronous ***
+# ***-------------***
+
+def format_message_to_send(*args):
+    addr, message = args
+    msg_to_send_dict = {
+        'from_addr': addr,
+        'message': message
+    }
+
+    return dumps(msg_to_send_dict).encode()
+
+
+# ***--------------***
+# *** Asynchronous ***
+# ***--------------***
+
 async def establish_ext_serv_conn(host, port):
     reader = None
     writer = None
@@ -19,16 +37,6 @@ async def establish_ext_serv_conn(host, port):
         print(str(exc))
 
     return reader, writer
-
-
-def format_message_to_send(*args):
-    addr, message = args
-    msg_to_send_dict = {
-        'from_addr': addr,
-        'message': message
-    }
-
-    return dumps(msg_to_send_dict).encode()
 
 
 async def transmit_message_to_dispatcher(from_addr, message):
