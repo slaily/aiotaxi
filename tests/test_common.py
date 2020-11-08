@@ -1,7 +1,10 @@
 import asyncio
 
 from unittest import TestCase
-from unittest.mock import AsyncMock
+from unittest.mock import (
+    patch,
+    AsyncMock
+)
 
 from aiotaxi import common
 
@@ -24,3 +27,10 @@ class CommonTestCase(TestCase):
         writer = asyncio.run(common.close_stream_writer(amock))
 
         amock.wait_closed.assert_awaited_once()
+
+    @patch('asyncio.start_server', new=AsyncMock())
+    def test_create_server(self):
+        args = (lambda x: x, '127.0.0.1', 2222)
+        asyncio.run(common.create_server(*args))
+
+        asyncio.start_server.assert_called_once_with(*args)
