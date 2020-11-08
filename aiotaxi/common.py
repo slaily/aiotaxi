@@ -1,3 +1,6 @@
+import asyncio
+
+
 # ***-------------***
 # *** Synchronous ***
 # ***-------------***
@@ -37,5 +40,19 @@ async def write_message(writer, message):
 async def close_stream_writer(writer):
     writer.close()
     await writer.wait_closed()
+
+    return None
+
+
+async def create_server(client_handler_cb, host, port):
+    server = await asyncio.start_server(
+        client_handler_cb, host, port
+    )
+
+    addr = server.sockets[0].getsockname()
+    print(f'Serving on {addr}')
+
+    async with server:
+        await server.serve_forever()
 
     return None
