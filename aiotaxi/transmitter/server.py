@@ -14,42 +14,40 @@ async def handle_client(reader, writer):
         addr = common.get_client_addr(writer)
         common.display_connected_client(addr)
         unrecognized_message_counter = 0
+        reply = b''
+        loop_should_stop = False
 
         while message := await reader.readline():
             decoded_message = message.decode().strip('\n')
             common.display_received_message(decoded_message, addr)
 
             if decoded_message.lower().startswith('dispatcher'):
-                _, received_message = await utils.transmit_message_to_dispatcher(
+                _, reply = await utils.transmit_message_to_dispatcher(
                     addr, decoded_message
                 )
-                asyncio.create_task(
-                    common.write_message(writer, received_message)
-                )
-                break
+                loop_should_stop = True
             elif decoded_message.lower().startswith('client'):
-                is_transmitted, received_message = await utils.transmit_message_to_dispatcher(
+                is_transmitted, reply = await utils.transmit_message_to_dispatcher(
                     addr, decoded_message
                 )
 
                 if not is_transmitted:
-                    break
-
-                asyncio.create_task(
-                    common.write_message(writer, received_message)
-                )
+                    loop_should_stop = True
             elif decoded_message.lower().startswith('close'):
                 break
             else:
-                if unrecognized_message_counter == 3:
-                    break
+                if unrecognized_message_counter == 2:
+                    loop_should_stop = True
 
                 unrecognized_message_counter += 1
-                asyncio.create_task(
-                    common.write_message(
-                        writer, b'Unrecognized message, do you need a taxi?\n'
-                    )
-                )
+                reply = b'Unrecognized message, do you need a taxi?\n'
+
+            asyncio.create_task(
+                common.write_message(writer, reply)
+            )
+
+            if loop_should_stop:
+                break
 
         print(f'Client {addr!r} - Leaving Connection.')
     except asyncio.CancelledError:
