@@ -1,6 +1,10 @@
 import asyncio
 
 from aiotaxi import common
+from aiotaxi.settings import (
+    TRANSMITTER_HOST,
+    TRANSMITTER_PORT
+)
 
 from . import utils
 
@@ -60,17 +64,10 @@ async def handle_client(reader, writer):
 
 
 async def main():
-    server = await asyncio.start_server(
-        handle_client, '127.0.0.1', 8888)
-
-    addr = server.sockets[0].getsockname()
-    print(f'Serving on {addr}')
-
-    async with server:
-        await server.serve_forever()
+    await common.create_server(handle_client, TRANSMITTER_HOST, TRANSMITTER_PORT)
 
 
 try:
-    asyncio.run(main(), debug=True)
+    asyncio.run(main())
 except KeyboardInterrupt:
     print('Server is shutting down...')
