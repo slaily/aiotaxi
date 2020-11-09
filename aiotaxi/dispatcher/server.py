@@ -3,6 +3,10 @@ import asyncio
 from json import loads
 
 from aiotaxi import common
+from aiotaxi.settings import (
+    DISPATCHER_HOST,
+    DISPATCHER_PORT
+)
 
 from . import utils
 
@@ -30,14 +34,7 @@ async def handle_client(reader, writer):
 
 
 async def main():
-    server = await asyncio.start_server(
-        handle_client, '127.0.0.1', 9999)
-
-    addr = server.sockets[0].getsockname()
-    print(f'Serving on {addr}')
-
-    async with server:
-        await server.serve_forever()
+    await common.create_server(handle_client, DISPATCHER_HOST, DISPATCHER_PORT)
 
 
 asyncio.run(main())
